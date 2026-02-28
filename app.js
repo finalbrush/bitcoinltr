@@ -272,21 +272,13 @@ async function fetchFearGreed() {
 async function fetchCryptoNews() {
   const res = await fetch('/api/news');
   const json = await res.json();
-  return json.results.slice(0, 8).map(item => {
-    const pos = (item.votes.positive || 0) + (item.votes.bullish || 0);
-    const neg = (item.votes.negative || 0) + (item.votes.bearish || 0);
-    let bias = 'neutral';
-    if (neg > pos * 1.5) bias = 'extreme_negative';
-    else if (neg > pos) bias = 'negative';
-    else if (pos > neg) bias = 'positive';
-    return {
-      title: item.title,
-      source: item.source.title,
-      bias,
-      date: timeAgo(item.published_at),
-      url: item.url
-    };
-  });
+  return json.results.slice(0, 8).map(item => ({
+    title: item.title,
+    source: item.source.title,
+    bias: item._bias || 'neutral',
+    date: item._date || timeAgo(item.published_at),
+    url: item.url || ''
+  }));
 }
 
 // ─── 미디어 점수 계산 ─────────────────────────────────
