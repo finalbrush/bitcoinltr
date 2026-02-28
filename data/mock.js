@@ -97,6 +97,8 @@ const MOCK_DATA = {
 
   aiPower: {
     score: 68,                  // 0-100 (높을수록 BTC에 우호적)
+    onchainScore: 72,           // 온체인 건강도 점수 (해시레이트+활성주소+멤풀+도미넌스+펀딩)
+    aiNewsScore: 55,            // AI·에너지 뉴스 감성 점수
     summary: 'AI 데이터센터 전력 수요 급증, 단기 채굴 비용 압박 vs 장기 에너지 인프라 확대',
     news: [
       {

@@ -1,6 +1,11 @@
 // ─── 점수 계산 ────────────────────────────────────────
+// 온체인 데이터를 단기·중기·장기 전 구간에 반영
 function calcScores(data) {
   const { media, policy, aiPower } = data;
+
+  // 온체인 점수 (서버에서 분리 제공, 없으면 기존 aiPower.score 사용)
+  const onchain = aiPower.onchainScore || aiPower.score;
+  const aiNews = aiPower.aiNewsScore || aiPower.score;
 
   // 극도 공포 구간(fearGreedIndex < 25)에서 역발상 보정: mediaScore 보너스
   const mediaAdj = media.fearGreedIndex < 25
@@ -9,14 +14,23 @@ function calcScores(data) {
     ? Math.min(100, media.mediaScore * 1.1)
     : media.mediaScore;
 
-  // 단기: 언론 70% + 정책 30%
-  const short = Math.min(100, Math.round(mediaAdj * 0.70 + policy.score * 0.30));
+  // 단기: 언론 50% + 온체인 30% + 정책 20%
+  // → 펀딩레이트·멤풀·도미넌스가 단기 방향에 핵심
+  const short = Math.min(100, Math.round(
+    mediaAdj * 0.50 + onchain * 0.30 + policy.score * 0.20
+  ));
 
-  // 중기: 언론 35% + 정책 65%
-  const mid = Math.min(100, Math.round(media.mediaScore * 0.35 + policy.score * 0.65));
+  // 중기: 정책 40% + 온체인 35% + 언론 25%
+  // → 정책 방향 + 해시레이트·활성주소 추세가 중기 판단 근거
+  const mid = Math.min(100, Math.round(
+    policy.score * 0.40 + onchain * 0.35 + media.mediaScore * 0.25
+  ));
 
-  // 장기: 정책 60% + AI전력 40%
-  const long = Math.min(100, Math.round(policy.score * 0.60 + aiPower.score * 0.40));
+  // 장기: 정책 40% + 온체인 40% + AI·에너지 뉴스 20%
+  // → 펀더멘탈(정책+온체인 건강도)이 장기 가치 결정
+  const long = Math.min(100, Math.round(
+    policy.score * 0.40 + onchain * 0.40 + aiNews * 0.20
+  ));
 
   return { short, mid, long };
 }

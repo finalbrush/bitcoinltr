@@ -347,7 +347,7 @@ async function handleAipower(res) {
   const summary = `AI·에너지·온체인·시장구조 6개월 종합 (뉴스${allForNewsScore.length}건+180d)`;
 
   res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
-  res.end(JSON.stringify({ score, summary, onchain, news }));
+  res.end(JSON.stringify({ score, onchainScore, aiNewsScore: newsScore, summary, onchain, news }));
 }
 
 // ─── 서버 ────────────────────────────────────────────────
