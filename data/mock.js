@@ -9,9 +9,15 @@ const MOCK_DATA = {
 
   media: {
     fearGreedIndex: 22,       // 0-100 (낮을수록 극도 공포)
+    fearGreedHistory: [45,42,38,35,33,30,28,25,22,20,18,20,25,30,35,40,38,35,30,28,25,22,20,18,15,18,20,22,25,22],
     mediaScore: 18,           // 0-100 (낮을수록 극단적 부정 보도)
     manipulationAlert: true,  // 조작 의심 경보
     manipulationReason: '단기 급락과 동시에 주요 매체 부정 기사 집중 게재',
+    social: {
+      upPct: 54.4,
+      downPct: 45.6,
+      watchlistUsers: 2347456
+    },
     news: [
       {
         title: '비트코인 급락... "10만 달러는 버블이었다" 전문가 경고',

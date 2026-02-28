@@ -42,7 +42,10 @@
     <div class="score-rows">
 
       <div class="score-row">
-        <div class="score-label">단기</div>
+        <div class="score-label-wrap">
+          <div class="score-label">단기</div>
+          <div class="score-range">1~7일</div>
+        </div>
         <div class="score-bar-wrap">
           <div class="score-bar-fill" id="score-fill-short" style="width:0%"></div>
         </div>
@@ -50,7 +53,10 @@
       </div>
 
       <div class="score-row">
-        <div class="score-label">중기</div>
+        <div class="score-label-wrap">
+          <div class="score-label">중기</div>
+          <div class="score-range">1~6개월</div>
+        </div>
         <div class="score-bar-wrap">
           <div class="score-bar-fill" id="score-fill-mid" style="width:0%"></div>
         </div>
@@ -58,7 +64,10 @@
       </div>
 
       <div class="score-row">
-        <div class="score-label">장기</div>
+        <div class="score-label-wrap">
+          <div class="score-label">장기</div>
+          <div class="score-range">6개월+</div>
+        </div>
         <div class="score-bar-wrap">
           <div class="score-bar-fill" id="score-fill-long" style="width:0%"></div>
         </div>
@@ -119,6 +128,32 @@
       </div>
     </div>
 
+    <!-- F&G 30일 추세바 -->
+    <div class="fg-trend-wrap" id="fg-trend-bar" style="display:none">
+      <div class="fg-trend-header">
+        <span class="fg-trend-title">30일 공포탐욕 추세</span>
+        <span class="fg-trend-labels"><span class="fg-trend-old">30일 전</span><span class="fg-trend-new">오늘</span></span>
+      </div>
+      <div class="fg-trend-cells" id="fg-trend-cells"></div>
+      <div class="fg-trend-summary" id="fg-trend-summary">—</div>
+    </div>
+
+    <!-- 커뮤니티 감정 -->
+    <div class="social-card" id="social-card" style="display:none">
+      <div class="social-header">
+        <span class="social-title">커뮤니티 감정</span>
+        <span class="social-watchlist" id="social-watchlist">—</span>
+      </div>
+      <div class="social-bar-wrap">
+        <div class="social-bar-up" id="social-bar-up" style="width:50%"></div>
+        <div class="social-bar-down" id="social-bar-down" style="width:50%"></div>
+      </div>
+      <div class="social-labels">
+        <span class="social-up-label">긍정 <span id="social-up-pct">—</span>%</span>
+        <span class="social-down-label">부정 <span id="social-down-pct">—</span>%</span>
+      </div>
+    </div>
+
     <!-- 조작 의심 경보 -->
     <div class="manip-alert" id="manip-alert-media" style="display:none">
       <div class="manip-alert-icon">🚨</div>
@@ -172,6 +207,40 @@
         <div class="section-score-bar-fill" id="ai-score-fill" style="width:0%"></div>
       </div>
       <div class="section-score-summary" id="ai-summary">—</div>
+    </div>
+
+    <!-- 온체인 지표 카드 -->
+    <div class="onchain-grid" id="onchain-grid">
+      <div class="onchain-card">
+        <div class="onchain-label">해시레이트</div>
+        <div class="onchain-value" id="oc-hashrate">—</div>
+        <div class="onchain-trend" id="oc-hashrate-trend"></div>
+      </div>
+      <div class="onchain-card">
+        <div class="onchain-label">활성 주소</div>
+        <div class="onchain-value" id="oc-addresses">—</div>
+        <div class="onchain-trend" id="oc-addresses-trend"></div>
+      </div>
+      <div class="onchain-card">
+        <div class="onchain-label">멤풀 거래</div>
+        <div class="onchain-value" id="oc-mempool">—</div>
+        <div class="onchain-sub" id="oc-fee">수수료 —</div>
+      </div>
+      <div class="onchain-card">
+        <div class="onchain-label">24h 거래량</div>
+        <div class="onchain-value" id="oc-volume">—</div>
+        <div class="onchain-sub" id="oc-difficulty">난이도 —</div>
+      </div>
+      <div class="onchain-card">
+        <div class="onchain-label">BTC 도미넌스</div>
+        <div class="onchain-value" id="oc-dominance">—</div>
+        <div class="onchain-sub">시장 점유율</div>
+      </div>
+      <div class="onchain-card">
+        <div class="onchain-label">펀딩레이트</div>
+        <div class="onchain-value" id="oc-funding">—</div>
+        <div class="onchain-sub" id="oc-funding-signal">—</div>
+      </div>
     </div>
 
     <!-- AI 전력 뉴스 -->

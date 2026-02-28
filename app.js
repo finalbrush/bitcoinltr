@@ -103,7 +103,7 @@ function renderScoreCard(scores) {
     fill.style.setProperty('--fill-color', color);
 
     const num = document.getElementById('score-num-' + k);
-    num.textContent = v;
+    num.innerHTML = v + '<span class="score-verdict" style="color:' + color + '">' + scoreLabel(v) + '</span>';
     num.style.color = color;
   });
 
@@ -156,6 +156,43 @@ function renderMediaSection(media) {
       : fg >= 70
       ? '언론이 극단적 탐욕을 조장하는 구간입니다. 고점 인근일 가능성이 있습니다.'
       : '언론 센티멘트가 중립 또는 일반 구간입니다.';
+
+  // F&G 30일 추세바
+  const trendWrap = document.getElementById('fg-trend-bar');
+  if (media.fearGreedHistory && media.fearGreedHistory.length > 1) {
+    const hist = media.fearGreedHistory;
+    trendWrap.style.display = 'block';
+    const barsHtml = hist.map((v, i) => {
+      const isToday = i === hist.length - 1;
+      return `<div class="fg-trend-cell${isToday ? ' today' : ''}" style="background:${fgColor(v)}" title="${hist.length - i}일 전: ${v}"></div>`;
+    }).join('');
+    document.getElementById('fg-trend-cells').innerHTML = barsHtml;
+    // 추세 요약
+    const avg30 = Math.round(hist.reduce((a, b) => a + b, 0) / hist.length);
+    const avg7 = hist.length >= 7
+      ? Math.round(hist.slice(-7).reduce((a, b) => a + b, 0) / 7)
+      : avg30;
+    const trendDir = avg7 > avg30 ? '↑ 회복세' : avg7 < avg30 ? '↓ 하락세' : '→ 유지';
+    document.getElementById('fg-trend-summary').textContent =
+      `30일 평균 ${avg30} · 7일 평균 ${avg7} ${trendDir}`;
+  } else {
+    trendWrap.style.display = 'none';
+  }
+
+  // 커뮤니티 감정
+  const socialCard = document.getElementById('social-card');
+  if (media.social && media.social.upPct > 0) {
+    socialCard.style.display = 'block';
+    const up = media.social.upPct;
+    const down = media.social.downPct;
+    document.getElementById('social-bar-up').style.width = up + '%';
+    document.getElementById('social-bar-down').style.width = down + '%';
+    document.getElementById('social-up-pct').textContent = up.toFixed(1);
+    document.getElementById('social-down-pct').textContent = down.toFixed(1);
+    const users = media.social.watchlistUsers;
+    document.getElementById('social-watchlist').textContent =
+      users >= 1e6 ? (users / 1e6).toFixed(1) + 'M 관심' : Math.round(users / 1e3) + 'K 관심';
+  }
 
   // 조작 경보
   const manipEl = document.getElementById('manip-alert-media');
@@ -223,6 +260,43 @@ function renderAiSection(ai) {
   document.getElementById('ai-score-fill').style.background = color;
   document.getElementById('ai-summary').textContent = ai.summary;
 
+  // 온체인 지표 렌더링
+  if (ai.onchain) {
+    const oc = ai.onchain;
+    document.getElementById('oc-hashrate').textContent = oc.hashRate;
+    const htEl = document.getElementById('oc-hashrate-trend');
+    htEl.textContent = oc.hashRateTrend === 'up' ? '7d ▲' : '7d ▼';
+    htEl.className = 'onchain-trend ' + (oc.hashRateTrend === 'up' ? 'trend-up' : 'trend-down');
+
+    document.getElementById('oc-addresses').textContent = oc.activeAddresses.toLocaleString();
+    const atEl = document.getElementById('oc-addresses-trend');
+    atEl.textContent = oc.activeAddressesTrend === 'up' ? '7d ▲' : '7d ▼';
+    atEl.className = 'onchain-trend ' + (oc.activeAddressesTrend === 'up' ? 'trend-up' : 'trend-down');
+
+    document.getElementById('oc-mempool').textContent = oc.mempoolCount.toLocaleString();
+    document.getElementById('oc-fee').textContent = '수수료 ' + oc.recommendedFee + ' sat/vB';
+
+    document.getElementById('oc-volume').textContent = oc.volume24h;
+    document.getElementById('oc-difficulty').textContent = '난이도 ' + oc.difficulty;
+
+    document.getElementById('oc-dominance').textContent = oc.btcDominance === '—' ? '—' : oc.btcDominance + '%';
+    document.getElementById('oc-funding').textContent = oc.fundingRate + '%';
+    const frVal = parseFloat(oc.fundingRate);
+    const frSignal = document.getElementById('oc-funding-signal');
+    if (frVal < -0.001) {
+      frSignal.textContent = '매도 과잉 (역발상 ↑)';
+      frSignal.style.color = 'var(--green)';
+    } else if (frVal > 0.01) {
+      frSignal.textContent = '과열 주의';
+      frSignal.style.color = 'var(--red)';
+    } else {
+      frSignal.textContent = '중립';
+      frSignal.style.color = 'var(--text2)';
+    }
+
+    document.getElementById('onchain-grid').style.display = 'grid';
+  }
+
   const list = document.getElementById('ai-news-list');
   list.innerHTML = ai.news.map(n => `
     <div class="ai-news-card ${n.impact}">
@@ -258,36 +332,67 @@ function timeAgo(isoStr) {
   const diff = Math.floor((Date.now() - new Date(isoStr)) / 60000);
   if (diff < 60) return diff + 'm ago';
   if (diff < 1440) return Math.floor(diff / 60) + 'h ago';
-  return Math.floor(diff / 1440) + 'd ago';
+  const days = Math.floor(diff / 1440);
+  if (days < 30) return days + 'd ago';
+  return Math.floor(days / 30) + 'mo ago';
 }
 
-// ─── 공포탐욕 fetch (Alternative.me) ─────────────────
+// ─── 공포탐욕 fetch (Alternative.me, 30일 히스토리 포함) ──
 async function fetchFearGreed() {
-  const res = await fetch('https://api.alternative.me/fng/');
+  const res = await fetch('https://api.alternative.me/fng/?limit=30');
   const json = await res.json();
-  return parseInt(json.data[0].value);
+  const current = parseInt(json.data[0].value);
+  const history = json.data.map(d => parseInt(d.value)).reverse(); // 오래된 → 최신 순
+  return { current, history };
 }
 
 // ─── 뉴스 fetch (서버 프록시 경유) ────────────────────
 async function fetchCryptoNews() {
   const res = await fetch('/api/news');
   const json = await res.json();
-  return json.results.slice(0, 8).map(item => ({
+  const allNews = json.results.map(item => ({
     title: item.title,
     source: item.source.title,
     bias: item._bias || 'neutral',
     date: item._date || timeAgo(item.published_at),
     url: item.url || ''
   }));
+  // _scoring: 서버가 전체 RSS 센티멘트 집계 제공
+  return { allNews, _scoring: json._scoring || null };
 }
 
-// ─── 미디어 점수 계산 ─────────────────────────────────
-function calcMediaScore(fearGreed, news) {
+// ─── 미디어 점수 계산 (전체 모수 기반) ──────────────────
+function calcMediaScore(fearGreed, news, scoring, social) {
   const biasMap = { extreme_negative: 5, negative: 25, neutral: 50, positive: 80 };
-  const avg = news.length
-    ? news.reduce((s, n) => s + (biasMap[n.bias] || 50), 0) / news.length
-    : fearGreed;
+  // scoring 데이터 있으면 전체 RSS 모수 사용
+  let avg;
+  if (scoring && scoring.total > 0) {
+    const neutral = scoring.total - scoring.positive - scoring.negative;
+    avg = (scoring.positive * 80 + neutral * 50 + scoring.negative * 15) / scoring.total;
+  } else {
+    avg = news.length
+      ? news.reduce((s, n) => s + (biasMap[n.bias] || 50), 0) / news.length
+      : fearGreed;
+  }
+  // 소셜 감정 반영 (있으면 20% 가중)
+  if (social && social.upPct > 0) {
+    const socialScore = social.upPct; // 0-100 스케일
+    return Math.round(fearGreed * 0.4 + avg * 0.4 + socialScore * 0.2);
+  }
   return Math.round(fearGreed * 0.5 + avg * 0.5);
+}
+
+// ─── 커뮤니티 감정 fetch (CoinGecko) ────────────────
+async function fetchSocialSentiment() {
+  const res = await fetch(
+    'https://api.coingecko.com/api/v3/coins/bitcoin?localization=false&tickers=false&market_data=false&community_data=true&developer_data=false'
+  );
+  const data = await res.json();
+  return {
+    upPct: data.sentiment_votes_up_percentage || 0,
+    downPct: data.sentiment_votes_down_percentage || 0,
+    watchlistUsers: data.watchlist_portfolio_users || 0
+  };
 }
 
 // ─── 실시간 가격 fetch (CoinGecko) ──────────────────
@@ -312,28 +417,41 @@ async function fetchLivePrice() {
   }
 }
 
-// ─── 언론 데이터 fetch (공포탐욕 + 뉴스) ─────────────
+// ─── 언론 데이터 fetch (공포탐욕 + 뉴스 + 소셜) ──────
 async function fetchMediaData() {
-  // 공포탐욕 지수 (항상 실시간)
+  // 공포탐욕 지수 (항상 실시간, 30일 히스토리 포함)
   try {
-    const fearGreed = await fetchFearGreed();
-    MOCK_DATA.media.fearGreedIndex = fearGreed;
-    MOCK_DATA.media.mediaScore = calcMediaScore(fearGreed, MOCK_DATA.media.news);
+    const fg = await fetchFearGreed();
+    MOCK_DATA.media.fearGreedIndex = fg.current;
+    MOCK_DATA.media.fearGreedHistory = fg.history;
+    MOCK_DATA.media.mediaScore = calcMediaScore(fg.current, MOCK_DATA.media.news, null, MOCK_DATA.media.social);
     render(MOCK_DATA);
   } catch(e) {
     console.warn('공포탐욕 로드 실패:', e);
   }
 
-  // CryptoPanic 뉴스 (서버 프록시)
+  // 커뮤니티 감정 (CoinGecko)
   try {
-    const news = await fetchCryptoNews();
-    MOCK_DATA.media.news = news;
-    MOCK_DATA.media.mediaScore = calcMediaScore(MOCK_DATA.media.fearGreedIndex, news);
-    // 극단 부정 뉴스 다수 시 조작 경보
-    const negCount = news.filter(n => n.bias === 'extreme_negative').length;
-    MOCK_DATA.media.manipulationAlert = negCount >= 3 && MOCK_DATA.media.fearGreedIndex < 30;
+    const social = await fetchSocialSentiment();
+    MOCK_DATA.media.social = social;
+    MOCK_DATA.media.mediaScore = calcMediaScore(MOCK_DATA.media.fearGreedIndex, MOCK_DATA.media.news, null, social);
+    render(MOCK_DATA);
+  } catch(e) {
+    console.warn('소셜 감정 로드 실패:', e);
+  }
+
+  // 뉴스 (서버 프록시, 전체 모수 점수 산출)
+  try {
+    const { allNews, _scoring } = await fetchCryptoNews();
+    const displayNews = allNews.slice(0, 8);  // 표시: 최신 8건
+    MOCK_DATA.media.news = displayNews;
+    MOCK_DATA.media.mediaScore = calcMediaScore(MOCK_DATA.media.fearGreedIndex, displayNews, _scoring, MOCK_DATA.media.social);
+    // 조작 경보: 비율 기반 (극단부정 >15% AND F&G <25)
+    const extremeCount = allNews.filter(n => n.bias === 'extreme_negative').length;
+    const extremeRatio = allNews.length > 0 ? extremeCount / allNews.length : 0;
+    MOCK_DATA.media.manipulationAlert = extremeRatio > 0.15 && MOCK_DATA.media.fearGreedIndex < 25;
     if (MOCK_DATA.media.manipulationAlert)
-      MOCK_DATA.media.manipulationReason = '극단 부정 기사 ' + negCount + '건 집중 — 조작 가능성 감지';
+      MOCK_DATA.media.manipulationReason = `극단 부정 ${(extremeRatio * 100).toFixed(0)}% (${extremeCount}/${allNews.length}건) — F&G ${MOCK_DATA.media.fearGreedIndex} 극단 공포 구간`;
     render(MOCK_DATA);
   } catch(e) {
     console.warn('뉴스 로드 실패, 목업 사용:', e);

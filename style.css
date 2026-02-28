@@ -173,12 +173,25 @@ body {
   gap: 10px;
 }
 
+.score-label-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 48px;
+  flex-shrink: 0;
+}
+
 .score-label {
   font-size: 12px;
   font-weight: 600;
   color: var(--text2);
-  width: 28px;
-  flex-shrink: 0;
+}
+
+.score-range {
+  font-size: 9px;
+  color: var(--text3);
+  letter-spacing: 0.02em;
+  margin-top: -1px;
 }
 
 .score-bar-wrap {
@@ -199,8 +212,18 @@ body {
 .score-num {
   font-size: 15px;
   font-weight: 700;
-  min-width: 36px;
+  min-width: 56px;
   text-align: right;
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: 4px;
+}
+
+.score-verdict {
+  font-size: 10px;
+  font-weight: 600;
+  opacity: 0.85;
 }
 
 .score-comment {
@@ -418,6 +441,139 @@ body {
   line-height: 1.5;
 }
 
+/* ─── F&G 30일 추세바 ────────────────────────────── */
+.fg-trend-wrap {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px 16px 12px;
+  margin-bottom: 10px;
+}
+
+.fg-trend-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.fg-trend-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text2);
+  letter-spacing: 0.03em;
+}
+
+.fg-trend-labels {
+  display: flex;
+  gap: 12px;
+  font-size: 10px;
+  color: var(--text3);
+}
+
+.fg-trend-cells {
+  display: flex;
+  gap: 2px;
+  height: 24px;
+  align-items: flex-end;
+}
+
+.fg-trend-cell {
+  flex: 1;
+  height: 100%;
+  border-radius: 2px;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+  cursor: default;
+}
+
+.fg-trend-cell:hover {
+  opacity: 1;
+  transform: scaleY(1.15);
+}
+
+.fg-trend-cell.today {
+  opacity: 1;
+  box-shadow: 0 0 4px rgba(255,255,255,0.3);
+  border: 1px solid rgba(255,255,255,0.3);
+}
+
+.fg-trend-summary {
+  margin-top: 8px;
+  font-size: 11px;
+  color: var(--text2);
+  text-align: center;
+}
+
+/* ─── 커뮤니티 감정 카드 ─────────────────────────── */
+.social-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px 16px;
+  margin-bottom: 10px;
+}
+
+.social-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.social-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text2);
+  letter-spacing: 0.03em;
+}
+
+.social-watchlist {
+  font-size: 11px;
+  color: var(--text3);
+  font-weight: 500;
+}
+
+.social-bar-wrap {
+  display: flex;
+  height: 22px;
+  border-radius: 6px;
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+
+.social-bar-up {
+  background: var(--green);
+  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 700;
+  color: #000;
+}
+
+.social-bar-down {
+  background: var(--red);
+  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.social-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.social-up-label { color: var(--green); }
+.social-down-label { color: var(--red); }
+
 /* ─── 조작 경보 섹션 인라인 ──────────────────────── */
 .manip-alert {
   background: rgba(239,68,68,0.06);
@@ -517,6 +673,52 @@ body {
   font-size: 12px;
   font-weight: 600;
   color: var(--green);
+}
+
+/* ─── 온체인 지표 그리드 ─────────────────────────── */
+.onchain-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.onchain-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.onchain-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text3);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.onchain-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.3;
+}
+
+.onchain-trend {
+  font-size: 11px;
+  font-weight: 600;
+}
+.onchain-trend.trend-up { color: var(--green); }
+.onchain-trend.trend-down { color: var(--red); }
+
+.onchain-sub {
+  font-size: 11px;
+  color: var(--text2);
+  margin-top: 1px;
 }
 
 /* ─── AI전력 뉴스 카드 (detail 포함) ─────────────── */
