@@ -348,14 +348,42 @@ async function fetchMediaData() {
   }
 }
 
+// ─── 정책 데이터 fetch ────────────────────────────────
+async function fetchPolicyData() {
+  try {
+    const res = await fetch('/api/policy');
+    const data = await res.json();
+    MOCK_DATA.policy = data;
+    render(MOCK_DATA);
+  } catch(e) {
+    console.warn('정책 데이터 로드 실패:', e);
+  }
+}
+
+// ─── AI·전력 데이터 fetch ─────────────────────────────
+async function fetchAiData() {
+  try {
+    const res = await fetch('/api/aipower');
+    const data = await res.json();
+    MOCK_DATA.aiPower = data;
+    render(MOCK_DATA);
+  } catch(e) {
+    console.warn('AI 데이터 로드 실패:', e);
+  }
+}
+
 // ─── 초기화 ───────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   initTabs();
   render(MOCK_DATA);            // 목업 즉시 표시
   fetchLivePrice();             // 실시간 가격
   fetchMediaData();             // 공포탐욕 + 뉴스
-  setInterval(fetchLivePrice, 60000);       // 가격: 60초
-  setInterval(fetchMediaData, 60 * 60000); // 언론: 1시간
+  fetchPolicyData();            // 정책
+  fetchAiData();                // AI·전력
+  setInterval(fetchLivePrice, 60000);        // 가격: 60초
+  setInterval(fetchMediaData, 60 * 60000);  // 언론: 1시간
+  setInterval(fetchPolicyData, 60 * 60000); // 정책: 1시간
+  setInterval(fetchAiData, 60 * 60000);     // AI: 1시간
 
   // 스플래시 페이드아웃
   const splash = document.getElementById('splash');
