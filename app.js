@@ -294,18 +294,24 @@ function renderAiSection(ai) {
     document.getElementById('oc-difficulty').textContent = '난이도 ' + oc.difficulty;
 
     document.getElementById('oc-dominance').textContent = oc.btcDominance === '—' ? '—' : oc.btcDominance + '%';
-    document.getElementById('oc-funding').textContent = oc.fundingRate + '%';
-    const frVal = parseFloat(oc.fundingRate);
     const frSignal = document.getElementById('oc-funding-signal');
-    if (frVal < -0.001) {
-      frSignal.textContent = '매도 과잉 (역발상 ↑)';
-      frSignal.style.color = 'var(--green)';
-    } else if (frVal > 0.01) {
-      frSignal.textContent = '과열 주의';
-      frSignal.style.color = 'var(--red)';
+    if (oc.fundingRate === '—') {
+      document.getElementById('oc-funding').textContent = '—';
+      frSignal.textContent = '데이터 없음';
+      frSignal.style.color = 'var(--text3)';
     } else {
-      frSignal.textContent = '중립';
-      frSignal.style.color = 'var(--text2)';
+      document.getElementById('oc-funding').textContent = oc.fundingRate + '%';
+      const frVal = parseFloat(oc.fundingRate);
+      if (frVal < -0.001) {
+        frSignal.textContent = '매도 과잉 (역발상 ↑)';
+        frSignal.style.color = 'var(--green)';
+      } else if (frVal > 0.01) {
+        frSignal.textContent = '과열 주의';
+        frSignal.style.color = 'var(--red)';
+      } else {
+        frSignal.textContent = '중립';
+        frSignal.style.color = 'var(--text2)';
+      }
     }
 
     document.getElementById('onchain-grid').style.display = 'grid';

@@ -279,7 +279,27 @@ async function handleAipower(res) {
     fetch('https://mempool.space/api/v1/fees/recommended').then(r => r.json()),
     fetch('https://api.blockchair.com/bitcoin/stats').then(r => r.json()),
     fetch('https://api.coingecko.com/api/v3/global').then(r => r.json()).catch(() => null),
-    fetch('https://fapi.binance.com/fapi/v1/fundingRate?symbol=BTCUSDT&limit=1').then(r => r.json()).catch(() => null)
+    fetch('https://fapi.binance.com/fapi/v1/fundingRate?symbol=BTCUSDT&limit=1')
+      .then(r => r.json())
+      .then(d => Array.isArray(d) ? d : null)
+      .catch(() =>
+        // Binance 차단 시 Bybit → CoinGecko 순차 폴백
+        fetch('https://api.bybit.com/v5/market/tickers?category=linear&symbol=BTCUSDT')
+          .then(r => r.json())
+          .then(d => {
+            const fr = d?.result?.list?.[0]?.fundingRate;
+            return fr ? [{ fundingRate: fr }] : null;
+          })
+          .catch(() =>
+            fetch('https://api.coingecko.com/api/v3/derivatives/exchanges/binance_futures?include_tickers=unexpired')
+              .then(r => r.json())
+              .then(d => {
+                const t = (d.tickers || []).find(t => t.symbol === 'BTCUSDT');
+                return t ? [{ fundingRate: String(t.funding_rate) }] : null;
+              })
+              .catch(() => null)
+          )
+      )
   ]);
 
   // ─── AI·에너지 뉴스 필터링 (6개월) ───
@@ -327,7 +347,7 @@ async function handleAipower(res) {
     volume24h: formatVolume(stats.volume_24h || 0),
     difficulty: formatDifficulty(stats.difficulty || 0),
     btcDominance: btcDominance ? btcDominance.toFixed(1) : '—',
-    fundingRate: fundingRate ? (fundingRate * 100).toFixed(4) : '0.0000'
+    fundingRate: fundingRate !== 0 ? (fundingRate * 100).toFixed(4) : '—'
   };
 
   // ─── 온체인 + 시장 구조 점수 ───
