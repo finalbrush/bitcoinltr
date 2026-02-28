@@ -281,16 +281,21 @@ async function handleAipower(res) {
     fetch('https://api.coingecko.com/api/v3/global').then(r => r.json()).catch(() => null),
     fetch('https://fapi.binance.com/fapi/v1/fundingRate?symbol=BTCUSDT&limit=1')
       .then(r => r.json())
-      .then(d => Array.isArray(d) ? d : null)
+      .then(d => {
+        if (Array.isArray(d) && d.length > 0) return d;
+        throw new Error('Binance: not array');
+      })
       .catch(() =>
-        // Binance 차단 시 Bybit → CoinGecko 순차 폴백
+        // Binance 차단 시 Bybit 폴백
         fetch('https://api.bybit.com/v5/market/tickers?category=linear&symbol=BTCUSDT')
           .then(r => r.json())
           .then(d => {
             const fr = d?.result?.list?.[0]?.fundingRate;
-            return fr ? [{ fundingRate: fr }] : null;
+            if (fr) return [{ fundingRate: fr }];
+            throw new Error('Bybit: no data');
           })
           .catch(() =>
+            // Bybit 실패 시 CoinGecko 폴백
             fetch('https://api.coingecko.com/api/v3/derivatives/exchanges/binance_futures?include_tickers=unexpired')
               .then(r => r.json())
               .then(d => {

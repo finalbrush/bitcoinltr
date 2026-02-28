@@ -102,16 +102,21 @@ export default async function handler(req, res) {
       fetch('https://api.coingecko.com/api/v3/global').then(r => r.json()).catch(() => null),
       fetch('https://fapi.binance.com/fapi/v1/fundingRate?symbol=BTCUSDT&limit=1')
         .then(r => r.json())
-        .then(d => Array.isArray(d) ? d : null)
+        .then(d => {
+          if (Array.isArray(d) && d.length > 0) return d;
+          throw new Error('Binance: not array');
+        })
         .catch(() =>
-          // Binance 차단 시 Bybit → CoinGecko 순차 폴백
+          // Binance 차단 시 Bybit 폴백
           fetch('https://api.bybit.com/v5/market/tickers?category=linear&symbol=BTCUSDT')
             .then(r => r.json())
             .then(d => {
               const fr = d?.result?.list?.[0]?.fundingRate;
-              return fr ? [{ fundingRate: fr }] : null;
+              if (fr) return [{ fundingRate: fr }];
+              throw new Error('Bybit: no data');
             })
             .catch(() =>
+              // Bybit 실패 시 CoinGecko 폴백
               fetch('https://api.coingecko.com/api/v3/derivatives/exchanges/binance_futures?include_tickers=unexpired')
                 .then(r => r.json())
                 .then(d => {
@@ -192,7 +197,7 @@ export default async function handler(req, res) {
     const summary = `AI·에너지·온체인·시장구조 6개월 종합 (뉴스${allForNewsScore.length}건+180d)`;
 
     res.setHeader('Cache-Control', 's-maxage=3600');
-    res.json({ score, summary, onchain, news });
+    res.json({ score, onchainScore, aiNewsScore: newsScore, summary, onchain, news });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
