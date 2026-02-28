@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#0a0a0f">
+  <title>BIT HORIZON</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ── Header ── -->
+  <header class="header">
+    <div class="header-top">
+      <div class="btc-label">
+        <div class="btc-icon">₿</div>
+        BIT HORIZON
+      </div>
+      <div class="last-updated" id="last-updated">—</div>
+    </div>
+
+    <div class="price-row">
+      <div class="price-main" id="price-main">$—</div>
+      <div class="price-change" id="price-change">—</div>
+    </div>
+
+    <div class="price-sub">
+      <div class="price-sub-item" id="price-7d">7일 —</div>
+      <div class="price-sub-item" id="price-ath">ATH 대비 —</div>
+    </div>
+
+    <!-- 조작 경보 뱃지 -->
+    <div class="alert-badge hidden" id="manip-alert-header">
+      <div class="alert-dot"></div>
+      <span>언론 조작 의심 — <span id="manip-alert-text"></span></span>
+    </div>
+  </header>
+
+  <!-- ── 종합 투자 점수 카드 ── -->
+  <div class="score-card">
+    <div class="score-card-title">종합 투자 점수</div>
+    <div class="score-rows">
+
+      <div class="score-row">
+        <div class="score-label">단기</div>
+        <div class="score-bar-wrap">
+          <div class="score-bar-fill" id="score-fill-short" style="width:0%"></div>
+        </div>
+        <div class="score-num" id="score-num-short">—</div>
+      </div>
+
+      <div class="score-row">
+        <div class="score-label">중기</div>
+        <div class="score-bar-wrap">
+          <div class="score-bar-fill" id="score-fill-mid" style="width:0%"></div>
+        </div>
+        <div class="score-num" id="score-num-mid">—</div>
+      </div>
+
+      <div class="score-row">
+        <div class="score-label">장기</div>
+        <div class="score-bar-wrap">
+          <div class="score-bar-fill" id="score-fill-long" style="width:0%"></div>
+        </div>
+        <div class="score-num" id="score-num-long">—</div>
+      </div>
+
+    </div>
+    <div class="score-comment" id="score-comment">—</div>
+  </div>
+
+  <!-- ── 탭 ── -->
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="media">
+      <span class="tab-emoji">📰</span>
+      <span class="tab-text">언론</span>
+    </button>
+    <button class="tab-btn" data-tab="policy">
+      <span class="tab-emoji">🏛️</span>
+      <span class="tab-text">정책</span>
+    </button>
+    <button class="tab-btn" data-tab="ai">
+      <span class="tab-emoji">⚡</span>
+      <span class="tab-text">AI·전력</span>
+    </button>
+  </div>
+
+  <!-- ── 언론 패널 ── -->
+  <div class="section-panel active" id="panel-media">
+
+    <!-- 섹션 점수 -->
+    <div class="section-score-header">
+      <div class="section-score-top">
+        <div class="section-score-title">언론 센티멘트 점수</div>
+        <div class="section-score-num" id="media-score-num">—</div>
+      </div>
+      <div class="section-score-bar-wrap">
+        <div class="section-score-bar-fill" id="media-score-fill" style="width:0%"></div>
+      </div>
+      <div class="section-score-summary">
+        공포탐욕 지수·미디어 편향도 종합 / 극단 공포 구간은 역발상 가산점 적용
+      </div>
+    </div>
+
+    <!-- 공포탐욕 지수 -->
+    <div class="fear-greed-card">
+      <div class="fg-circle">
+        <svg viewBox="0 0 72 72" width="72" height="72">
+          <circle cx="36" cy="36" r="28" fill="none" stroke="var(--bg3)" stroke-width="7"/>
+          <circle id="fg-arc" cx="36" cy="36" r="28" fill="none" stroke="#22c55e"
+            stroke-width="7" stroke-linecap="round"
+            stroke-dasharray="175.9" stroke-dashoffset="175.9"/>
+        </svg>
+        <div class="fg-circle-num" id="fg-circle-num">—</div>
+      </div>
+      <div class="fg-right">
+        <div class="fg-label" id="fg-label">—</div>
+        <div class="fg-desc" id="fg-desc">—</div>
+      </div>
+    </div>
+
+    <!-- 조작 의심 경보 -->
+    <div class="manip-alert" id="manip-alert-media" style="display:none">
+      <div class="manip-alert-icon">🚨</div>
+      <div class="manip-alert-body">
+        <div class="manip-alert-title">언론 조작 의심 감지</div>
+        <div class="manip-alert-desc" id="manip-alert-media-desc">—</div>
+      </div>
+    </div>
+
+    <!-- 뉴스 목록 -->
+    <div class="news-list" id="news-list"></div>
+
+  </div>
+
+  <!-- ── 정책 패널 ── -->
+  <div class="section-panel" id="panel-policy">
+
+    <!-- 섹션 점수 -->
+    <div class="section-score-header">
+      <div class="section-score-top">
+        <div class="section-score-title">정책 우호도 점수</div>
+        <div class="section-score-num" id="policy-score-num">—</div>
+      </div>
+      <div class="section-score-bar-wrap">
+        <div class="section-score-bar-fill" id="policy-score-fill" style="width:0%"></div>
+      </div>
+      <div class="section-score-summary" id="policy-summary">—</div>
+    </div>
+
+    <!-- 펀더멘탈 불변 배지 -->
+    <div class="fundamental-badge" id="fundamental-badge" style="display:none">
+      <span>✅</span>
+      <span>핵심 정책 기조 변화 없음 — 펀더멘탈 불변 확인</span>
+    </div>
+
+    <!-- 타임라인 -->
+    <div class="timeline" id="policy-timeline"></div>
+
+  </div>
+
+  <!-- ── AI·전력 패널 ── -->
+  <div class="section-panel" id="panel-ai">
+
+    <!-- 섹션 점수 -->
+    <div class="section-score-header">
+      <div class="section-score-top">
+        <div class="section-score-title">AI·전력 영향 점수</div>
+        <div class="section-score-num" id="ai-score-num">—</div>
+      </div>
+      <div class="section-score-bar-wrap">
+        <div class="section-score-bar-fill" id="ai-score-fill" style="width:0%"></div>
+      </div>
+      <div class="section-score-summary" id="ai-summary">—</div>
+    </div>
+
+    <!-- AI 전력 뉴스 -->
+    <div id="ai-news-list"></div>
+
+  </div>
+
+  <!-- ── 스플래시 ── -->
+  <div id="splash">
+    <div class="splash-logo">
+      <div class="splash-btc-icon">₿</div>
+      <div class="splash-title">BIT HORIZON</div>
+      <div class="splash-sub">넓은 시야로 비트코인 시장을 바라보다</div>
+    </div>
+  </div>
+
+  <script src="data/mock.js"></script>
+  <script src="app.js"></script>
+
+</body>
+</html>
